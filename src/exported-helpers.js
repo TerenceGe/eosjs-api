@@ -35,7 +35,7 @@ module.exports = {
   @arg {number} expireInSeconds - How many seconds until expiration
   @arg {function(error, headers)} callback {@link headers}
   @see {headers}
-  @example testnet.createTransaction(60, (error, headers) => {})
+  @example eos.createTransaction(60, (error, headers) => {})
 */
 function createTransaction(api, expireInSeconds = 60, callback) {
   if(!callback) {
@@ -52,15 +52,15 @@ function createTransaction(api, expireInSeconds = 60, callback) {
       const expiration = new Date(chainDate.getTime() + expireInSeconds * 1000)
       const headers = {
         expiration: expiration.toISOString().split('.')[0],
-        region: 0,
         ref_block_num,
         ref_block_prefix: block.ref_block_prefix,
-        max_net_usage_words: 0,
-        max_kcpu_usage: 0,
+        net_usage_words: 0,
+        max_cpu_usage_ms: 0,
         delay_sec: 0,
         context_free_actions: [],
         actions: [],
         signatures: [],
+        transaction_extensions: []
       }
       callback(null, headers)
     }))
