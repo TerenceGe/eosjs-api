@@ -1,6 +1,6 @@
 {
   "name": "react-native-eosjs-api",
-  "version": "6.0.2",
+  "version": "6.1.3",
   "description": "Application programming interface to EOS blockchain nodes.",
   "main": "lib/index.js",
   "scripts": {
@@ -41,7 +41,8 @@
   },
   "dependencies": {
     "camel-case": "^3.0.0",
-    "is-browser": "^2.0.1"
+    "is-browser": "^2.0.1",
+    "isomorphic-fetch": "^2.2.1"
   },
   "babel": {
     "presets": [
