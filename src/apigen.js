@@ -79,7 +79,7 @@ function fetchMethod (methodName, url, definition, config) {
     const fetchConfiguration = {body, method: 'POST'}
     Object.assign(fetchConfiguration, config.fetchConfiguration)
 
-    fetch(url, fetchConfiguration).then(response => {
+    return fetch(url, fetchConfiguration).then(response => {
       if (response.status >= 200 && response.status < 300) {
         return response.json()
       } else {
@@ -87,41 +87,42 @@ function fetchMethod (methodName, url, definition, config) {
           const error = new Error(bodyResp)
           error.status = response.status
           error.statusText = response.statusText
-          throw error
+          return Promise.reject(error)
         })
       }
-    }).then(objectResp => {
-      if (debug && logger.debug) {
-        logger.debug('api <', objectResp)
-      }
-      try {
-        callback(null, objectResp)
-      } catch(callbackError) {
-        if(logger.error) {
-          logger.error(callbackError)
-        }
-      }
     })
-    .catch(error => {
-      let message = ''
-      try {
-        // nodeos format (fail safe)
-        message = JSON.parse(error.message).error.details[0]
-      } catch(e2) {}
+    // .then(objectResp => {
+    //   if (debug && logger.debug) {
+    //     logger.debug('api <', objectResp)
+    //   }
+    //   try {
+    //     callback(null, objectResp)
+    //   } catch(callbackError) {
+    //     if(logger.error) {
+    //       logger.error(callbackError)
+    //     }
+    //   }
+    // })
+    // .catch(error => {
+    //   let message = ''
+    //   try {
+    //     // nodeos format (fail safe)
+    //     message = JSON.parse(error.message).error.details[0]
+    //   } catch(e2) {}
 
-      if(logger.error) {
-        logger.error('api error =>', message, url, body)
-        logger.error(error)
-      }
+    //   if(logger.error) {
+    //     logger.error('api error =>', message, url, body)
+    //     logger.error(error)
+    //   }
 
-      try {
-        callback(error)
-      } catch(callbackError) {
-        if(logger.error) {
-          logger.error(callbackError)
-        }
-      }
-    })
+    //   try {
+    //     callback(error)
+    //   } catch(callbackError) {
+    //     if(logger.error) {
+    //       logger.error(callbackError)
+    //     }
+    //   }
+    // })
 
     return returnPromise
   }
