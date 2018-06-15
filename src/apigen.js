@@ -84,7 +84,7 @@ function fetchMethod (methodName, url, definition, config) {
         return response.json()
       } else {
         return response.text().then(bodyResp => {
-          const error = new Error(bodyResp)
+          const error = { message: bodyResp }
           error.status = response.status
           error.statusText = response.statusText
           return Promise.reject(error)
