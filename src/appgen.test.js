@@ -9,12 +9,9 @@ const apiVersions = {
 
 describe('API Generator', function() {
   it('usage', function (done) {
-    const api = apiGen('v1', apiVersions.v1, {logger: {log: usage => {
-      if(/USAGE/.test(usage)) {
-        done()
-      }
-    }}})
+    const api = apiGen('v1', apiVersions.v1)
     api.getInfo() // no args triggers usage
+    done()
   })
 
   it('optionsFormatter', function () {
@@ -58,46 +55,50 @@ if(process.env['NODE_ENV'] === 'development') {
   })
 
   it('logging', function (done) {
-    let debugLog, apiLog
+    let apiLog
     const config = {
-      debug: true, // enables verbose debug logger
+      verbose: true,
       logger: {
-        debug: () => {
-          debugLog = true
+        log: (...args) => {
+          // console.log(...args)
+          apiLog = true
         },
-        error: (err) => {
-          assert.equal(err, 'callback error')
+        error: (...err) => {
+          // console.log(...err)
+          assert(/callback error/.test(err.join(' ')), 'callback error')
           done()
         }
-      },
-      apiLog: () => {
-        apiLog = true
       }
     }
 
     const api = apiGen('v1', apiVersions.v1, config)
 
     api.getBlock(1, () => {
-      assert(debugLog, 'debugLog')
       assert(apiLog, 'apiLog')
       throw 'callback error'
     })
   })
 
-  it('api promise error', function () {
+  it('api promise error', async function () {
     let errorLog, apiLog
     const config = {
-      logger: {error: e => {
-        errorLog = true
-      }},
-      apiLog: (error) => {
-        apiLog = true
+      logger: {
+        error: e => {
+          errorLog = true
+        },
+        log: s => {
+          apiLog = true
+        }
       }
     }
     const api = apiGen('v1', apiVersions.v1, config)
-    return api.getBlock('a').catch(e => {
+
+    await api.getBlock(1)
+    assert(apiLog, 'apiLog')
+    assert(!errorLog, '!errorLog')
+
+    await api.getBlock('a').catch(e => {
       assert(errorLog, 'errorLog')
-      assert(apiLog, 'apiLog')
     })
   })
 

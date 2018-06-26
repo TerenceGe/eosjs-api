@@ -4,19 +4,18 @@ const processArgs = require('./process-args')
 
 module.exports = apiGen
 
-const configDefaults = {
-  httpEndpoint: 'http://127.0.0.1:8888',
-  debug: false, // debug logging
-  logger: {
-    log: console.log,
-    error: console.error,
-    debug: console.log
-  }
-}
-
 function apiGen (version, definitions, config) {
-  config = Object.assign({}, configDefaults, config)
-  Object.assign(configDefaults.logger, config.logger)
+  config = Object.assign({
+    httpEndpoint: 'http://127.0.0.1:8888',
+    verbose: false
+  }, config)
+
+  const defaultLogger = {
+    log: config.verbose ? console.log : '',
+    error: console.error
+  }
+
+  config.logger = Object.assign({}, defaultLogger, config.logger)
 
   const api = {}
   const {httpEndpoint} = config
@@ -36,13 +35,11 @@ function apiGen (version, definitions, config) {
 }
 
 function fetchMethod (methodName, url, definition, config) {
-  const {debug, apiLog, logger} = config
+  const {logger} = config
 
   return function (...args) {
     if (args.length === 0) {
-      if(logger.log) {
-        logger.log(usage(methodName, definition))
-      }
+      console.log(usage(methodName, definition))
       return
     }
 
@@ -57,24 +54,9 @@ function fetchMethod (methodName, url, definition, config) {
     const {params, options, returnPromise} = processedArgs
     let {callback} = processedArgs
 
-    if(apiLog) {
-      // wrap the callback with the logger
-
-      const superCallback = callback
-      callback = (error, tr) => {
-        if(error) {
-          apiLog(error, methodName)
-        } else {
-          // TODO apiLog(error, methodName, result)
-          apiLog(null, tr, methodName)
-        }
-        superCallback(error, tr)
-      }
-    }
-
     const body = JSON.stringify(params)
-    if (debug && logger.debug) {
-      logger.debug('api >', url, body)
+    if (logger.log) {
+      logger.log('api >', 'post', '\t', url, body)
     }
     const fetchConfiguration = {body, method: 'POST'}
     Object.assign(fetchConfiguration, config.fetchConfiguration)
