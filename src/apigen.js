@@ -61,7 +61,7 @@ function fetchMethod (methodName, url, definition, config) {
     const fetchConfiguration = {body, method: 'POST'}
     Object.assign(fetchConfiguration, config.fetchConfiguration)
 
-    return fetch(url, fetchConfiguration).then(response => {
+    fetch(url, fetchConfiguration).then(response => {
       if (response.status >= 200 && response.status < 300) {
         return response.json()
       } else {
@@ -72,39 +72,23 @@ function fetchMethod (methodName, url, definition, config) {
           return Promise.reject(error)
         })
       }
+    }).then(objectResp => {
+      try {
+        callback(null, objectResp)
+      } catch(callbackError) {
+      }
     })
-    // .then(objectResp => {
-    //   if (debug && logger.debug) {
-    //     logger.debug('api <', objectResp)
-    //   }
-    //   try {
-    //     callback(null, objectResp)
-    //   } catch(callbackError) {
-    //     if(logger.error) {
-    //       logger.error(callbackError)
-    //     }
-    //   }
-    // })
-    // .catch(error => {
-    //   let message = ''
-    //   try {
-    //     // nodeos format (fail safe)
-    //     message = JSON.parse(error.message).error.details[0]
-    //   } catch(e2) {}
-
-    //   if(logger.error) {
-    //     logger.error('api error =>', message, url, body)
-    //     logger.error(error)
-    //   }
-
-    //   try {
-    //     callback(error)
-    //   } catch(callbackError) {
-    //     if(logger.error) {
-    //       logger.error(callbackError)
-    //     }
-    //   }
-    // })
+    .catch(error => {
+      let message = ''
+      try {
+        // nodeos format (fail safe)
+        message = JSON.parse(error.message).error.details[0]
+      } catch(e2) {}
+      try {
+        callback(error)
+      } catch(callbackError) {
+      }
+    })
 
     return returnPromise
   }
